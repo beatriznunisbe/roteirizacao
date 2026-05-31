@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --b9:#0a1628;--b8:#0d2040;--b7:#1a3a6b;--b6:#1d4ed8;--b5:#2563eb;--b4:#3b82f6;--b3:#93c5fd;--b1:#dbeafe;
+  --g7:#15803d;--g6:#16a34a;--g5:#22c55e;--g4:#4ade80;--g1:#dcfce7;
+  --r5:#ef4444;--a5:#f59e0b;
+  --gray5:#64748b;--gray4:#94a3b8;--gray3:#cbd5e1;--gray2:#e2e8f0;
+  --sw:220px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--b9);color:#e2e8f0;min-height:100vh;display:flex;overflow-x:hidden}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#login-screen{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,#0d2040,#0a1628 70%);display:flex;align-items:center;justify-content:center;z-index:9999}
+.lcard{background:var(--b8);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:44px 40px;width:390px;text-align:center;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+.licon{width:56px;height:56px;background:linear-gradient(135deg,var(--b6),var(--b4));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
+.llogo{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;text-transform:uppercase;letter-spacing:.05em}
+.lsub{font-size:11px;color:var(--b3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:26px}
+.lbadge{display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.2);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--b3);margin-bottom:26px}
+.ldot{width:6px;height:6px;background:var(--g5);border-radius:50%;animation:pulse 2s infinite}
+.lf{text-align:left;margin-bottom:14px}
+.lf label{display:block;font-size:12px;color:var(--gray4);margin-bottom:5px;font-weight:500}
+.lf input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:12px 14px;font-size:14px;color:#e2e8f0;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s}
+.lf input:focus{border-color:var(--b4)}
+.lbtn{width:100%;padding:13px;background:var(--g6);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:background .15s}
+.lbtn:hover{background:var(--g7)}
+.lerr{color:#fca5a5;font-size:12px;margin-top:10px;display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:8px 12px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--b8);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:28px;width:340px;text-align:center}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#fff;margin-bottom:8px}
+.modal-sub{font-size:12px;color:var(--gray4);margin-bottom:18px}
+.modal-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;font-size:14px;color:#e2e8f0;font-family:'DM Sans',sans-serif;outline:none;text-align:center;letter-spacing:.15em;margin-bottom:12px}
+.modal-input:focus{border-color:var(--r5)}
+.modal-err{color:#fca5a5;font-size:12px;margin-bottom:10px;display:none}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none}
+.mbtn-c{background:rgba(255,255,255,.07);color:var(--gray3)}
+.mbtn-d{background:var(--r5);color:#fff}
+#sidebar{width:var(--sw);min-width:var(--sw);background:var(--b8);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;position:fixed;left:0;top:0;height:100vh;z-index:100}
+.la{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.lt{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.05em;text-transform:uppercase}
+.ls{font-size:10px;color:var(--b3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.bfi{display:inline-flex;align-items:center;gap:5px;background:rgba(37,99,235,.25);border:1px solid rgba(59,130,246,.3);border-radius:6px;padding:4px 8px;margin-top:7px;font-size:10px;color:var(--b3)}
+.bdot{width:6px;height:6px;background:var(--g5);border-radius:50%;animation:pulse 2s infinite}
+nav{flex:1;padding:10px;overflow-y:auto}
+.ns{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray5);padding:10px 8px 5px;font-weight:600}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--gray4);font-size:13px;position:relative;margin-bottom:2px}
+.ni:hover{background:rgba(255,255,255,.06);color:#e2e8f0}
+.ni.active{background:rgba(37,99,235,.3);color:#fff;font-weight:500}
+.ni.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--b4);border-radius:0 2px 2px 0}
+.nicon{font-size:14px;width:18px;text-align:center}
+.sf{padding:12px 14px;border-top:1px solid rgba(255,255,255,.06)}
+.dcard{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.dav{width:28px;height:28px;background:linear-gradient(135deg,var(--b6),var(--b4));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.dname{font-size:12px;color:var(--gray3);font-weight:500}
+.drole{font-size:10px;color:var(--gray5)}
+.logob{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;cursor:pointer;color:var(--gray5);font-size:12px;transition:all .15s;border:none;background:transparent;width:100%;font-family:'DM Sans',sans-serif}
+.logob:hover{background:rgba(239,68,68,.1);color:#fca5a5}
+#main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:52px;background:var(--b8);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50}
+.ptitle{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:#fff}
+.pdate{font-size:12px;color:var(--gray4)}
+.schip{display:flex;align-items:center;gap:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--g4)}
+.content{flex:1;padding:24px;overflow-y:auto}
+.page{display:none;animation:fadeIn .2s ease}.page.active{display:block}
+.card{background:var(--b8);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px;margin-bottom:16px}
+.ctitle{font-family:'Syne',sans-serif;font-weight:600;font-size:14px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sc{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px}
+.slabel{font-size:11px;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sval{font-family:'Syne',sans-serif;font-weight:700;font-size:26px;color:#fff}
+.ssub{font-size:11px;color:var(--gray5);margin-top:4px}
+.sbadge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;margin-top:6px}
+.sbadge.g{background:var(--g1);color:var(--g7)}.sbadge.b{background:var(--b1);color:var(--b6)}.sbadge.r{background:#fee2e2;color:#b91c1c}
+label.fl{display:block;font-size:12px;color:var(--gray4);margin-bottom:5px;font-weight:500}
+input[type=text],input[type=number],input[type=time],input[type=date],select,textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;font-size:13px;color:#e2e8f0;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--b4)}
+select option{background:var(--b8);color:#e2e8f0}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.bp{background:var(--b5);color:#fff}.bp:hover{background:var(--b6)}
+.bg{background:var(--g6);color:#fff}.bg:hover{background:var(--g7)}
+.bo{background:transparent;color:var(--gray3);border:1px solid rgba(255,255,255,.12)}.bo:hover{background:rgba(255,255,255,.06)}
+.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.del-btn{background:none;border:none;cursor:pointer;padding:5px 7px;border-radius:6px;transition:all .15s;color:var(--gray5);font-size:15px;display:inline-flex;align-items:center}
+.del-btn:hover{background:rgba(239,68,68,.15);color:#fca5a5}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.pr{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.pa{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+.pg{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+.pb{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.3)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-weight:600}
+td{padding:10px 12px;font-size:12px;color:var(--gray3);border-bottom:1px solid rgba(255,255,255,.04)}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr:last-child td{border-bottom:none}
+.upzone{border:2px dashed rgba(59,130,246,.35);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(59,130,246,.04)}
+.upzone:hover{border-color:var(--b4);background:rgba(59,130,246,.08)}
+.isteps{display:flex;align-items:center;margin-bottom:18px;padding:12px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px}
+.istep{display:flex;align-items:center;gap:7px}
+.isc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .3s}
+.isc.done{background:var(--g6);color:#fff}.isc.active{background:var(--b5);color:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.25)}.isc.idle{background:rgba(255,255,255,.07);color:var(--gray5)}
+.isl{font-size:11px;white-space:nowrap;color:var(--gray5);transition:color .3s}
+.isl.active{color:#fff;font-weight:500}.isl.done{color:var(--g4)}
+.iline{flex:1;height:1px;background:rgba(255,255,255,.08);margin:0 8px;min-width:8px;transition:background .3s}
+.iline.done{background:var(--g6)}
+.depot-bar{display:flex;align-items:center;gap:12px;padding:11px 16px;background:rgba(37,99,235,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;margin-bottom:14px}
+.daddr{font-size:13px;color:#fff;font-weight:500}
+.dlabel{font-size:10px;color:var(--b3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.zg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.zcard{border:1.5px solid rgba(255,255,255,.08);border-radius:9px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .18s;background:rgba(255,255,255,.03);user-select:none}
+.zcard:hover{border-color:var(--b4);background:rgba(37,99,235,.1)}
+.zcard.sug{border-color:rgba(59,130,246,.45);background:rgba(37,99,235,.1)}
+.zcard.sel{border-color:var(--g5)!important;background:rgba(34,197,94,.1)!important;box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+.zname{font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:2px}
+.zcount{font-size:10px;color:var(--gray4)}
+.zbadge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;margin-top:5px;display:inline-block}
+.zbadge.zs{background:rgba(37,99,235,.3);color:var(--b3)}.zbadge.zsel{background:rgba(34,197,94,.3);color:var(--g4)}
+.zcbar{display:none;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px 16px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:10px;flex-wrap:wrap}
+.zcbar.on{display:flex}
+.pw{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:14px 16px;margin-bottom:14px;display:none}
+.pw.on{display:block}
+.pwt{font-size:13px;font-weight:600;color:#fcd34d;margin-bottom:10px}
+.pwi{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(245,158,11,.06);border-radius:7px;margin-bottom:6px;font-size:12px;color:var(--gray3)}
+.pwc{width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(245,158,11,.4);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;transition:all .15s;font-size:10px;color:#fff}
+.pwc.on{background:var(--g6);border-color:var(--g6)}
+.ritem{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;background:rgba(255,255,255,.03);border-radius:9px;margin-bottom:7px;border:1px solid rgba(255,255,255,.05);transition:all .15s}
+.ritem:hover{background:rgba(255,255,255,.05)}
+.ritem.dep{background:rgba(37,99,235,.08);border-color:rgba(59,130,246,.25)}
+.rnum{width:26px;height:26px;border-radius:50%;background:var(--b7);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--b3);flex-shrink:0}
+.rnum.dp{background:var(--b6);color:#fff}
+.rchk{width:18px;height:18px;border-radius:4px;border:1.5px solid rgba(255,255,255,.2);cursor:pointer;flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;background:transparent;transition:all .15s;font-size:11px;color:#fff}
+.rchk.on{background:var(--g6);border-color:var(--g6)}
+.raddr{font-size:13px;color:#e2e8f0;font-weight:500}
+.rmeta{font-size:11px;color:var(--gray5);margin-top:2px}
+.rdist{font-size:10px;color:var(--b3);margin-top:2px}
+.aibox{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);border-radius:9px;padding:11px 15px;margin-top:10px;font-size:12px;color:var(--gray3)}
+.aitag{background:var(--b6);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-right:5px}
+.loader{width:26px;height:26px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--b4);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+.apitem{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:13px 15px;margin-bottom:10px}
+.aph{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.apnf{font-size:12px;font-weight:700;color:var(--b3)}
+.apaddr{font-size:13px;color:#e2e8f0;margin-bottom:10px}
+.apctrl{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;width:100%}
+.sels{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;font-size:12px;color:#e2e8f0;cursor:pointer;font-family:'DM Sans',sans-serif;outline:none;min-width:155px}
+.motrow{display:none;flex-direction:column;gap:7px;width:100%;margin-top:8px;padding:10px 12px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:8px}
+.motrow.on{display:flex}
+.ss{margin-bottom:24px}
+.sstitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--b3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.sitem{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px;padding:13px}
+.lnote{font-size:10px;color:var(--a5);margin-top:4px}
+.fb{background:rgba(255,255,255,.03);border-radius:9px;padding:14px;border:1px solid rgba(255,255,255,.06)}
+.flabel{font-size:11px;color:var(--gray4);margin-bottom:4px}
+.fval{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff}
+.fval.r{color:#fca5a5}.fval.g{color:#86efac}
+.cw{position:relative;height:220px}.cwt{position:relative;height:260px}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:14px 0}
+.zs{text-align:center;padding:32px 20px;color:var(--gray5)}
+.zi{font-size:32px;margin-bottom:8px}.zt{font-size:14px;color:var(--gray4);margin-bottom:4px;font-weight:500}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--b7);border:1px solid rgba(59,130,246,.4);border-radius:10px;padding:12px 18px;font-size:13px;color:#e2e8f0;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px}
+#toast.on{transform:translateY(0);opacity:1}
+#toast.ok{border-color:rgba(34,197,94,.4);background:rgba(21,128,61,.4)}
+@media print{
+  body{background:#fff!important;display:block}
+  #login-screen,#sidebar,#main,#toast,.modal-overlay{display:none!important}
+  #print-area{display:block!important}
+  #rel-print{display:block!important}
+  @page{size:A4 landscape;margin:8mm}
+}
+#print-area{display:none}
+#rel-print{display:none}
+.rp{font-family:Arial,sans-serif;color:#111;font-size:10px;padding:8px}
+.rp-header{background:linear-gradient(135deg,#0d2040,#1d4ed8);color:#fff;padding:18px 22px;border-radius:8px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.rp-logo{font-size:18px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+.rp-sub{font-size:9px;opacity:.7;margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
+.rp-meta{text-align:right;font-size:9px;opacity:.8}
+.rp-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.rp-kcard{background:#f1f5f9;border-radius:6px;padding:10px;text-align:center;border-top:3px solid #1d4ed8}
+.rp-kval{font-size:22px;font-weight:900;color:#0f172a}
+.rp-klabel{font-size:8px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.rp-section{font-size:11px;font-weight:800;color:#1d4ed8;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 6px;padding-bottom:4px;border-bottom:2px solid #e2e8f0}
+.rp-tbl{width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px}
+.rp-tbl th{background:#1d4ed8;color:#fff;padding:4px 6px;text-align:left;white-space:nowrap}
+.rp-tbl td{padding:4px 6px;border-bottom:1px solid #e2e8f0;vertical-align:top;word-break:break-word}
+.rp-tbl tr:nth-child(even) td{background:#f8fafc}
+.rp-pill-s{background:#dcfce7;color:#15803d;padding:1px 5px;border-radius:3px;font-size:7.5px;font-weight:700}
+.rp-pill-i{background:#fee2e2;color:#b91c1c;padding:1px 5px;border-radius:3px;font-size:7.5px;font-weight:700}
+.rp-pill-p{background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:3px;font-size:7.5px;font-weight:700}
+.rp-motivos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.rp-motcard{background:#f8fafc;border-radius:5px;padding:8px 10px;border-left:3px solid #ef4444}
+.rp-motlabel{font-size:8px;color:#64748b;margin-bottom:3px}
+.rp-motval{font-size:12px;font-weight:800;color:#0f172a}
+.rp-footer{margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5px;color:#94a3b8}
+.rp-sign{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:16px}
+.rp-signbox{border-top:1px solid #334155;padding-top:5px;font-size:8px;color:#64748b;text-align:center}
+.rp-nota{background:#fffbeb;border-left:3px solid #f59e0b;padding:6px 10px;font-size:8px;color:#334155;margin-top:8px;border-radius:3px}
+.pp{font-family:Arial,sans-serif;color:#111;font-size:9.5px}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid #1d4ed8}
+.plogo{font-size:15px;font-weight:900;color:#1d4ed8;text-transform:uppercase}
+.pdep{background:#dbeafe;border:1px solid #93c5fd;border-radius:4px;padding:5px 10px;margin-bottom:8px;font-size:9px;color:#1d4ed8;font-weight:600}
+.psum{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px}
+.psb{background:#f1f5f9;border-radius:4px;padding:5px;text-align:center;border-top:2px solid #1d4ed8}
+.psv{font-size:17px;font-weight:800;color:#0f172a}
+.psl{font-size:7.5px;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.ptbl{width:100%;border-collapse:collapse;font-size:8.5px}
+.ptbl th{background:#1d4ed8;color:#fff;padding:4px 5px;text-align:left;white-space:nowrap}
+.ptbl td{padding:4px 5px;border-bottom:1px solid #e2e8f0;vertical-align:top;word-break:break-word}
+.ptbl tr:nth-child(even) td{background:#f8fafc}
+.psr{background:#fee2e2;color:#b91c1c;padding:1px 4px;border-radius:3px;font-size:7.5px;font-weight:700}
+.psa{background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;font-size:7.5px;font-weight:700}
+.psg{background:#dcfce7;color:#15803d;padding:1px 4px;border-radius:3px;font-size:7.5px;font-weight:700}
+.pfoot{margin-top:6px;padding-top:5px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5px;color:#94a3b8}
+.psign{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:12px}
+.pss{border-top:1px solid #334155;padding-top:5px;font-size:8.5px;color:#64748b;text-align:center}
+.pinst{background:#fffbeb;border-left:3px solid #f59e0b;padding:5px 8px;border-radius:3px;font-size:8px;color:#334155;margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lcard">
+    <div class="licon">&#9650;</div>
+    <div class="llogo">Roteirizacao</div>
+    <div class="lsub">Sistema de Logistica</div>
+    <div class="lbadge"><span class="ldot"></span>Fiorino &middot; 1 Motorista &middot; Sao Paulo</div>
+    <div class="lf"><label>Usuario</label><input type="text" id="lu" placeholder="Usuario" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>Senha</label><input type="password" id="lp" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="lbtn" onclick="doLogin()">Entrar no Sistema</button>
+    <div class="lerr" id="lerr">Usuario ou senha incorretos.</div>
+    <div style="margin-top:16px;font-size:11px;color:var(--gray5)">&copy; 2027 Roteirizacao</div>
+  </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal-box">
+    <div style="font-size:32px;margin-bottom:10px">&#128465;&#65039;</div>
+    <div class="modal-title">Confirmar Exclusao</div>
+    <div class="modal-sub" id="del-msg">Digite a senha de administrador.</div>
+    <input type="password" class="modal-input" id="del-pass" placeholder="Senha admin" onkeydown="if(event.key==='Enter')confirmDelete()">
+    <div class="modal-err" id="del-err">Senha incorreta. Tente novamente.</div>
+    <div class="modal-btns">
+      <button class="mbtn-c" onclick="closeDelModal()">Cancelar</button>
+      <button class="mbtn-d" onclick="confirmDelete()">&#128465;&#65039; Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT -->
+<div id="print-area"><div class="pp" id="print-content"></div></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" style="display:none">
+  <div class="la">
+    <div class="lt">&#9650; Roteirizacao</div>
+    <div class="ls">Sistema de Logistica</div>
+    <div class="bfi"><span class="bdot"></span>Fiorino &middot; 1 Motorista</div>
+  </div>
+  <nav>
+    <div class="ns">Principal</div>
+    <div class="ni active" onclick="goTo('config')"><span class="nicon">&#9881;</span>Configuracoes</div>
+    <div class="ni" onclick="goTo('import')"><span class="nicon">&#128194;</span>Importar &amp; Roteirizar</div>
+    <div class="ns">Operacao</div>
+    <div class="ni" onclick="goTo('apontamento')"><span class="nicon">&#9999;</span>Apontamento</div>
+    <div class="ni" onclick="goTo('historico')"><span class="nicon">&#128203;</span>Historico</div>
+    <div class="ns">Analises</div>
+    <div class="ni" onclick="goTo('dashboard')"><span class="nicon">&#128202;</span>Dashboard</div>
+  </nav>
+  <div class="sf">
+    <div class="dcard">
+      <div class="dav">M</div>
+      <div><div class="dname">Motorista Principal</div><div class="drole">Fiorino &middot; Ativo</div></div>
+    </div>
+    <button class="logob" onclick="doLogout()">&#128682; Sair do sistema</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main" style="display:none">
+  <div class="topbar">
+    <div><div class="ptitle" id="ttitle">Configuracoes</div><div class="pdate" id="tdate"></div></div>
+    <div class="schip"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>Sistema Ativo</div>
+  </div>
+  <div class="content">
+
+    <!-- CONFIG -->
+    <div class="page active" id="page-config">
+      <div class="g2" style="gap:20px">
+        <div>
+          <div class="ss">
+            <div class="sstitle">&#128274; Parametros Protegidos</div>
+            <div class="sgrid">
+              <div class="sitem"><label class="fl">Horario Inicio</label><input type="time" value="09:00" readonly style="opacity:.6;cursor:not-allowed"><div class="lnote">Travado</div></div>
+              <div class="sitem"><label class="fl">Horario Termino</label><input type="time" value="17:00" readonly style="opacity:.6;cursor:not-allowed"><div class="lnote">Travado</div></div>
+              <div class="sitem"><label class="fl">Tempo Almoco</label><input type="text" value="1 hora (60 min)" readonly style="opacity:.6;cursor:not-allowed"><div class="lnote">Travado</div></div>
+              <div class="sitem"><label class="fl">Tempo Max/Parada</label><input type="text" value="15 minutos" readonly style="opacity:.6;cursor:not-allowed"><div class="lnote">Travado</div></div>
+            </div>
+          </div>
+          <div class="ss">
+            <div class="sstitle">&#9999; Parametros Editaveis</div>
+            <div class="sgrid">
+              <div class="sitem"><label class="fl">Nome do Motorista</label><input type="text" value="Motorista Principal"></div>
+              <div class="sitem"><label class="fl">Placa do Veiculo</label><input type="text" placeholder="ABC-1234"></div>
+              <div class="sitem"><label class="fl">Modelo Veiculo</label><input type="text" value="Fiat Fiorino" readonly style="opacity:.7"></div>
+              <div class="sitem"><label class="fl">Combustivel</label><select><option>Flex (Gasolina)</option><option>Flex (Etanol)</option><option>GNV</option></select></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ctitle">&#127968; Base de Saida (Fixo)</div>
+            <div class="depot-bar"><span style="font-size:18px">&#128659;</span><div><div class="dlabel">Saida e Retorno</div><div class="daddr">Rua Marina, 1338 &mdash; CEP 09560-560 &mdash; SP</div></div></div>
+            <div style="font-size:12px;color:var(--gray5)">Rota calculada do mais longe para o mais proximo desta base.</div>
+          </div>
+          <div class="card">
+            <div class="ctitle">&#128507; Regioes SP</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Zona Sul</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Zona Norte</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Zona Leste</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Zona Oeste</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Centro</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">ABC</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Interior</span>
+              <span style="padding:4px 10px;background:rgba(37,99,235,.2);color:var(--b3);border:1px solid rgba(37,99,235,.3);border-radius:6px;font-size:11px;font-weight:600">Litoral</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px">
+        <button class="btn bg" onclick="showToast('Configuracoes salvas!','ok')">&#128190; Salvar</button>
+        <button class="btn bo">&#8617; Restaurar Padroes</button>
+      </div>
+    </div>
+
+    <!-- IMPORTAR -->
+    <div class="page" id="page-import">
+      <div class="isteps">
+        <div class="istep"><div class="isc active" id="sc1">1</div><div class="isl active" id="sl1">Importar</div></div>
+        <div class="iline" id="ln1"></div>
+        <div class="istep"><div class="isc idle" id="sc2">2</div><div class="isl" id="sl2">Analisar regioes</div></div>
+        <div class="iline" id="ln2"></div>
+        <div class="istep"><div class="isc idle" id="sc3">3</div><div class="isl" id="sl3">Escolher zona(s)</div></div>
+        <div class="iline" id="ln3"></div>
+        <div class="istep"><div class="isc idle" id="sc4">4</div><div class="isl" id="sl4">Gerar rota</div></div>
+      </div>
+      <div class="g2" style="gap:20px;align-items:start">
+        <div>
+          <div class="depot-bar">
+            <span style="font-size:18px">&#127968;</span>
+            <div><div class="dlabel">Ponto fixo de saida e retorno</div><div class="daddr">Rua Marina, 1338 &mdash; CEP 09560-560</div></div>
+          </div>
+          <div class="pw" id="pw">
+            <div class="pwt">&#9888; Enderecos sem baixa da rota anterior &mdash; deseja incluir?</div>
+            <div id="pwlist"></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--gray4)">Marque os que deseja adicionar a nova rota.</div>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div class="ctitle" style="margin-bottom:0">&#128228; Passo 1 &mdash; Upload da Planilha</div>
+              <button class="del-btn" title="Excluir planilha" onclick="openDel('file','Excluir planilha importada?')">&#128465;&#65039;</button>
+            </div>
+            <div class="upzone" onclick="document.getElementById('finput').click()">
+              <div style="font-size:28px;margin-bottom:6px">&#128202;</div>
+              <div style="font-size:13px;color:var(--gray3);margin-bottom:3px">Clique para importar a planilha</div>
+              <div style="font-size:11px;color:var(--gray5)">Formatos: .xlsx &middot; .csv</div>
+            </div>
+            <input type="file" id="finput" accept=".xlsx,.csv" style="display:none" onchange="handleUpload(event)">
+            <div id="finfo" style="display:none;margin-top:10px;padding:8px 13px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:12px;color:#86efac"></div>
+            <div style="margin-top:12px"><button class="btn bp" id="btn-analise" disabled onclick="analisarRegiao()">&#128269; Analisar Regioes</button></div>
+          </div>
+          <div class="card" id="card-zona" style="display:none">
+            <div class="ctitle">&#128205; Passo 2 &amp; 3 &mdash; Regioes e Zona(s)</div>
+            <div style="font-size:12px;color:var(--gray4);margin-bottom:10px">Distribuicao de paradas:</div>
+            <div id="rbars"></div>
+            <div class="divider"></div>
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px">Escolha a(s) zona(s) do dia</div>
+            <div style="font-size:11px;color:var(--gray4);margin-bottom:4px">Selecione <strong style="color:#fff">uma ou mais</strong>. Apos gerar pode desmarcar clientes e recalcular.</div>
+            <div class="zg" id="zona-grid"></div>
+            <div id="sel-info" style="display:none;margin-top:8px;padding:7px 11px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);border-radius:8px;font-size:12px;color:var(--b3)"></div>
+            <div class="zcbar" id="zcbar">
+              <div><div style="font-size:12px;color:var(--gray4)">Zona(s):</div><div style="font-size:13px;font-weight:700;color:var(--g4)" id="zcname">-</div><div style="font-size:11px;color:var(--gray5)" id="zcinfo"></div></div>
+              <button class="btn bg" onclick="gerarRota()">&#129302; Gerar Rota por IA</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ctitle">&#128269; Colunas da planilha</div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Coluna</th><th>Exemplo</th></tr></thead>
+                <tbody>
+                  <tr><td>NF (Nota Fiscal)</td><td style="color:var(--gray4)">NF-00123</td></tr>
+                  <tr><td>Endereco Completo</td><td style="color:var(--gray4)">Av. Paulista, 1000</td></tr>
+                  <tr><td>CEP</td><td style="color:var(--gray4)">01310-100</td></tr>
+                  <tr><td>Cliente / Loja</td><td style="color:var(--gray4)">Loja Centro SP</td></tr>
+                  <tr><td>Tipo de Operacao</td><td><span class="pill pb">Coleta</span> <span class="pill pg">Entrega</span></td></tr>
+                  <tr><td>ROTA</td><td style="color:var(--gray4)">Fiorino</td></tr>
+                  <tr><td>Status</td><td><span class="pill pr">Urgente</span> <span class="pill pa">Atrasado</span> <span class="pill pg">Pendente</span></td></tr>
+                  <tr><td>Volume (qtd)</td><td style="color:var(--gray4)">3</td></tr>
+                  <tr><td>Modelo Equipamento</td><td style="color:var(--gray4)">Impressora HP</td></tr>
+                  <tr><td>Responsavel</td><td style="color:var(--gray4)">Joao Silva</td></tr>
+                  <tr><td>Contato</td><td style="color:var(--gray4)">(11) 99999-9999</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <div class="ctitle" style="margin-bottom:0">&#128739; Passo 4 &mdash; Rota do Dia</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+                <button class="btn bo" id="btn-recalc" style="display:none;font-size:12px;padding:7px 12px" onclick="recalcularRota()">&#128260; Recalcular</button>
+                <button class="btn bo" id="btn-print" style="display:none;font-size:12px;padding:7px 12px" onclick="imprimirRota()">&#128424; Imprimir</button>
+                <button class="del-btn" title="Excluir rota" onclick="openDel('rota','Excluir a rota gerada?')">&#128465;&#65039;</button>
+              </div>
+            </div>
+            <div id="rota-list"><div class="zs"><div class="zi">&#129302;</div><div class="zt">Rota nao gerada</div><div style="font-size:12px">Siga os passos ao lado.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APONTAMENTO -->
+    <div class="page" id="page-apontamento">
+      <div class="g2" style="gap:20px;align-items:start">
+        <div>
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div class="ctitle" style="margin-bottom:0">&#9999; Apontamento das Paradas</div>
+              <button class="del-btn" title="Excluir apontamento" onclick="openDel('apontamento','Excluir todos os apontamentos do dia?')">&#128465;&#65039;</button>
+            </div>
+            <div style="font-size:12px;color:var(--gray4);margin-bottom:12px">Em caso de insucesso, selecione o tipo e descreva o motivo detalhado.</div>
+            <div id="ap-list"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ctitle">&#128197; Dados do Dia</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div><label class="fl">Data da Operacao</label><input type="date" id="ap-data"></div>
+              <div><label class="fl">Observacoes Gerais</label><textarea rows="3" id="ap-obs" placeholder="Anotacoes do dia..."></textarea></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ctitle">&#128202; Resumo do Dia</div>
+            <div class="g2" style="gap:10px">
+              <div class="sc"><div class="slabel">Total</div><div class="sval" id="ap-total">0</div></div>
+              <div class="sc"><div class="slabel">Concluidos</div><div class="sval" id="ap-ok" style="color:var(--g4)">0</div></div>
+              <div class="sc"><div class="slabel">Insucessos</div><div class="sval" id="ap-fail" style="color:#fca5a5">0</div></div>
+              <div class="sc"><div class="slabel">Pendentes</div><div class="sval" id="ap-pend" style="color:#fcd34d">0</div></div>
+            </div>
+            <div style="margin-top:12px"><button class="btn bg" style="width:100%" onclick="salvarApontamento()">&#128190; Salvar Apontamento</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORICO -->
+    <div class="page" id="page-historico">
+      <div class="card" style="margin-bottom:14px">
+        <div class="ctitle">&#128269; Filtros</div>
+        <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap">
+          <div><label class="fl">Data Inicio</label><input type="date" id="f-ini" style="width:auto;min-width:128px"></div>
+          <div><label class="fl">Data Fim</label><input type="date" id="f-fim" style="width:auto;min-width:128px"></div>
+          <div><label class="fl">NF</label><input type="text" id="f-nf" placeholder="NF-00123" style="width:auto;min-width:110px"></div>
+          <div><label class="fl">Regiao</label><select id="f-reg" style="width:auto;min-width:128px"><option value="">Todas</option><option>Zona Sul</option><option>Zona Norte</option><option>Zona Leste</option><option>Zona Oeste</option><option>Centro</option><option>ABC</option><option>Interior</option><option>Litoral</option></select></div>
+          <div><label class="fl">Tipo</label><select id="f-tipo" style="width:auto;min-width:110px"><option value="">Todos</option><option>Coleta</option><option>Entrega</option></select></div>
+          <button class="btn bp" onclick="filtrar()">Filtrar</button>
+          <button class="btn bo" onclick="limparFiltros()">Limpar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="ctitle" style="margin-bottom:0">&#128203; Historico</div>
+          <button class="del-btn" title="Excluir historico" onclick="openDel('historico','Excluir todo o historico?')">&#128465;&#65039;</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table><thead><tr><th>Data</th><th>NF</th><th>Cliente</th><th>Endereco</th><th>Tipo</th><th>Regiao</th><th>Status</th><th>Cat. Insucesso</th><th>Motivo Detalhado</th><th></th></tr></thead>
+          <tbody id="hist-body"><tr><td colspan="10" style="text-align:center;padding:32px;color:var(--gray5)">Nenhum registro.</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page" id="page-dashboard">
+
+      <!-- BARRA DE EXPORTACAO -->
+      <div style="background:var(--b8);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#fff;margin-bottom:2px">&#128196; Exportar Relatorio</div>
+          <div style="font-size:11px;color:var(--gray4)">Gere um relatorio completo para apresentacao ou arquivo. Escolha o formato desejado.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86efac;font-size:12px" onclick="exportCSV()">&#128229; Exportar CSV</button>
+          <button class="btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#93c5fd;font-size:12px" onclick="exportJSON()">&#123;&#125; Exportar JSON</button>
+          <button class="btn" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:#fcd34d;font-size:12px" onclick="exportRelPrint()">&#128424; Relatorio PDF</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="g4" style="margin-bottom:16px">
+        <div class="sc"><div class="slabel">Programado</div><div class="sval" id="d-prog">0</div><div class="sbadge b">Total</div></div>
+        <div class="sc"><div class="slabel">Realizado</div><div class="sval" id="d-real" style="color:var(--g4)">0</div><div class="sbadge g">Concluidos</div></div>
+        <div class="sc"><div class="slabel">Taxa Sucesso</div><div class="sval" id="d-taxa">-</div><div class="sbadge g">Geral</div></div>
+        <div class="sc"><div class="slabel">Clientes Atingidos</div><div class="sval" id="d-cli">0</div><div class="sbadge b">Lojas</div></div>
+      </div>
+
+      <!-- GRAFICOS LINHA 1 -->
+      <div class="g2" style="gap:14px;margin-bottom:14px">
+        <div class="card"><div class="ctitle">&#128202; Programado vs Realizado</div><div class="cw"><canvas id="c-geral"></canvas></div></div>
+        <div class="card"><div class="ctitle">&#128230; Volume Entregas &amp; Coletas</div><div class="cw"><canvas id="c-volume"></canvas></div></div>
+      </div>
+
+      <!-- GRAFICOS LINHA 2 -->
+      <div class="g2" style="gap:14px;margin-bottom:14px">
+        <div class="card"><div class="ctitle">&#128205; Clientes Atingidos por Loja</div><div class="cwt"><canvas id="c-lojas"></canvas></div></div>
+        <div class="card"><div class="ctitle">&#128683; Improdutivas vs Frustradas</div><div class="cw"><canvas id="c-insuc"></canvas></div></div>
+      </div>
+
+      <!-- MOTIVOS -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="ctitle">&#128221; Maiores Motivos de Insucesso</div>
+        <div id="motivos-list"><div class="zs" style="padding:20px"><div class="zt" style="font-size:12px">Sem dados registrados</div></div></div>
+      </div>
+
+      <!-- PAINEL FINANCEIRO -->
+      <div class="g3" style="gap:12px;margin-bottom:14px">
+        <div class="fb"><div class="flabel">&#9201; Tempo Perdido em Insucessos</div><div class="fval r" id="d-tempo">0 min</div></div>
+        <div class="fb"><div class="flabel">&#128200; Eficiencia Logistica</div><div class="fval g" id="d-efic">-</div></div>
+        <div class="fb"><div class="flabel">&#128666; Volumes Movimentados</div><div class="fval g" id="d-vol">0</div></div>
+      </div>
+
+      <!-- TABELA DETALHADA DO HISTORICO -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <div class="ctitle" style="margin-bottom:0">&#128203; Historico Detalhado (para exportacao)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="exp-ini" style="width:auto;min-width:130px;font-size:12px;padding:6px 10px" placeholder="De">
+              <input type="date" id="exp-fim" style="width:auto;min-width:130px;font-size:12px;padding:6px 10px" placeholder="Ate">
+              <button class="btn bp" style="font-size:12px;padding:7px 12px" onclick="filtrarExp()">Filtrar</button>
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="exp-table">
+            <thead>
+              <tr>
+                <th>Data</th><th>NF</th><th>Cliente</th><th>Endereco</th><th>Regiao</th>
+                <th>Tipo</th><th>Vol.</th><th>Modelo</th><th>Responsavel</th><th>Contato</th>
+                <th>Status</th><th>Cat.Insucesso</th><th>Motivo Detalhado</th>
+              </tr>
+            </thead>
+            <tbody id="exp-body">
+              <tr><td colspan="13" style="text-align:center;padding:28px;color:var(--gray5)">Salve apontamentos para visualizar o historico aqui.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:11px;color:var(--gray5)">Graficos e tabela alimentados pelos apontamentos salvos &nbsp;&middot;&nbsp; Use o botao <strong style="color:#fcd34d">Relatorio PDF</strong> para gerar apresentacao para a diretoria.</div>
+    </div>
+
+    <!-- PRINT RELATORIO DIRETORIA -->
+    <div id="rel-print" style="display:none">
+      <div id="rel-content"></div>
+    </div>
+
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const APP={routes:[],history:[],charts:{},fileLoaded:false,selectedZonas:new Set(),checkedRoutes:new Set(),pendingPrev:[],checkedPending:new Set(),delTarget:null,delCb:null};
+const DEPOT={addr:'Rua Marina, 1338 - CEP 09560-560 - SP',lat:-23.6501,lng:-46.5289};
+const DEMO=[
+  {nf:'NF-00241',addr:'Av. Paulista, 1578 - Bela Vista, SP',cep:'01310-200',tipo:'Entrega',status:'red',regiao:'Centro',lat:-23.5614,lng:-46.6558,volume:2,modelo:'Impressora HP LaserJet',responsavel:'Carlos Lima',contato:'(11) 98888-1111',cliente:'Loja Centro SP'},
+  {nf:'NF-00189',addr:'R. Augusta, 432 - Consolacao, SP',cep:'01304-000',tipo:'Coleta',status:'red',regiao:'Centro',lat:-23.5540,lng:-46.6571,volume:1,modelo:'Monitor Dell 24pol',responsavel:'Ana Costa',contato:'(11) 97777-2222',cliente:'Loja Augusta'},
+  {nf:'NF-00302',addr:'Av. Reboucas, 2000 - Pinheiros, SP',cep:'05402-300',tipo:'Entrega',status:'amber',regiao:'Zona Oeste',lat:-23.5653,lng:-46.6869,volume:3,modelo:'Notebook Lenovo',responsavel:'Pedro Matos',contato:'(11) 96666-3333',cliente:'Loja Pinheiros'},
+  {nf:'NF-00415',addr:'R. da Consolacao, 900 - Higienopolis, SP',cep:'01302-907',tipo:'Coleta',status:'amber',regiao:'Centro',lat:-23.5455,lng:-46.6556,volume:1,modelo:'Scanner Epson',responsavel:'Julia Ramos',contato:'(11) 95555-4444',cliente:'Loja Higienopolis'},
+  {nf:'NF-00198',addr:'Av. Ibirapuera, 3103 - Moema, SP',cep:'04029-902',tipo:'Entrega',status:'green',regiao:'Zona Sul',lat:-23.6012,lng:-46.6651,volume:4,modelo:'Projetor Epson',responsavel:'Marcos Souza',contato:'(11) 94444-5555',cliente:'Loja Moema'},
+  {nf:'NF-00267',addr:'R. Vergueiro, 2101 - Vila Mariana, SP',cep:'04102-000',tipo:'Entrega',status:'green',regiao:'Zona Sul',lat:-23.5897,lng:-46.6388,volume:2,modelo:'Impressora Epson',responsavel:'Fernanda Dias',contato:'(11) 93333-6666',cliente:'Loja Vila Mariana'},
+  {nf:'NF-00374',addr:'Av. Yervant Kissajikian, 400 - Santo Andre, SP',cep:'09111-001',tipo:'Coleta',status:'amber',regiao:'ABC',lat:-23.6614,lng:-46.5278,volume:1,modelo:'HD Externo 1TB',responsavel:'Roberto Alves',contato:'(11) 92222-7777',cliente:'Loja ABC'},
+];
+const ALL_ZONAS=['Centro','Zona Sul','Zona Oeste','Zona Leste','Zona Norte','ABC','Interior','Litoral'];
+
+// ── ALGORITMO: NEAREST NEIGHBOR GEOGRÁFICO PURO (sem ziguezague) ──
+// A prioridade (Urgente/Atrasado/Pendente) é exibida como badge mas NÃO
+// define a ordem. O trajeto é otimizado geograficamente: parte do depósito,
+// sempre vai para o vizinho mais próximo ainda não visitado, e retorna.
+// Isso evita SP → Santo André → SP → retorno.
+function dist(a,b){const dl=a.lat-b.lat,dg=a.lng-b.lng;return Math.sqrt(dl*dl+dg*dg);}
+function dkm(a,b){return(dist(a,b)*111).toFixed(1);}
+
+function optimizeRoute(stops){
+  if(!stops.length)return[];
+  let remaining=[...stops];
+  let ordered=[];
+  let last=DEPOT;
+  // Nearest Neighbor puro: do depósito, sempre pega o mais próximo não visitado
+  while(remaining.length){
+    let bi=0,bd=Infinity;
+    remaining.forEach((s,i)=>{const d=dist(last,s);if(d<bd){bd=d;bi=i;}});
+    const chosen=remaining.splice(bi,1)[0];
+    ordered.push(chosen);
+    last=chosen;
+  }
+  return ordered.map((r,i)=>({
+    ...r,
+    num:i+1,
+    dprev:i===0?dkm(DEPOT,r):dkm(ordered[i-1],r),
+    ddepot:dkm(r,DEPOT)
+  }));
+}
+
+function totalKm(route){
+  if(!route.length)return'0';
+  let t=dist(DEPOT,route[0]);
+  for(let i=1;i<route.length;i++)t+=dist(route[i-1],route[i]);
+  t+=dist(route[route.length-1],DEPOT);
+  return(t*111).toFixed(1);
+}
+
+function eHora(idx){
+  const m=9*60+(idx+1)*25;
+  const aj=m>4*60?m+60:m;
+  return String(Math.floor(aj/60)%24).padStart(2,'0')+':'+String(aj%60).padStart(2,'0');
+}
+
+// ── RODÍZIO ──
+// Placa QQK-5Z83 → último dígito numérico = 3 → restrição TERÇA-FEIRA
+// Horários: 07h–10h e 17h–20h no centro expandido de SP
+const PLACA='QQK-5Z83';
+const RODIZIO_DIA=2; // 0=Dom,1=Seg,2=TER,3=Qua,4=Qui,5=Sex,6=Sab
+const RODIZIO_H1=[7,10];  // manhã
+const RODIZIO_H2=[17,20]; // tarde
+function checkRodizio(){
+  const now=new Date();
+  const dia=now.getDay();
+  const h=now.getHours();
+  if(dia!==RODIZIO_DIA)return null;
+  const manhaAtiva=h>=RODIZIO_H1[0]&&h<RODIZIO_H1[1];
+  const tardeAtiva=h>=RODIZIO_H2[0]&&h<RODIZIO_H2[1];
+  if(manhaAtiva||tardeAtiva){
+    return'RODIZIO ATIVO agora ('+String(h).padStart(2,'0')+'h) — '+(manhaAtiva?'07h–10h':'17h–20h')+' | Placa '+PLACA+' restrita no centro expandido';
+  }
+  if(dia===RODIZIO_DIA){
+    return'Hoje é TERÇA — Placa '+PLACA+' tem rodízio 07h–10h e 17h–20h no centro expandido';
+  }
+  return null;
+}
+
+// LOGIN
+function doLogin(){
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  if(u==='ROTA'&&p==='ZHAZ2027'){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('sidebar').style.display='flex';
+    document.getElementById('main').style.display='flex';
+    showToast('Bem-vindo!','ok');
+  } else {
+    const e=document.getElementById('lerr');e.style.display='block';
+    document.getElementById('lp').value='';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+function doLogout(){
+  ['sidebar','main'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('lu').value='';document.getElementById('lp').value='';
+}
+
+// MODAL DELETE
+function openDel(target,msg,cb){
+  APP.delTarget=target;APP.delCb=cb||null;
+  document.getElementById('del-msg').textContent=msg||'Confirme a exclusao.';
+  document.getElementById('del-pass').value='';
+  document.getElementById('del-err').style.display='none';
+  document.getElementById('del-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('del-pass').focus(),100);
+}
+function closeDelModal(){
+  document.getElementById('del-modal').classList.remove('open');
+  APP.delTarget=null;APP.delCb=null;
+}
+function confirmDelete(){
+  if(document.getElementById('del-pass').value!=='LOG2026'){
+    document.getElementById('del-err').style.display='block';
+    document.getElementById('del-pass').value='';return;
+  }
+  closeDelModal();
+  const t=APP.delTarget;
+  if(t==='file'){
+    APP.fileLoaded=false;APP.routes=[];
+    document.getElementById('finfo').style.display='none';
+    document.getElementById('card-zona').style.display='none';
+    document.getElementById('btn-analise').disabled=true;
+    document.getElementById('rota-list').innerHTML='<div class="zs"><div class="zi">&#129302;</div><div class="zt">Rota excluida</div></div>';
+    document.getElementById('btn-print').style.display='none';
+    document.getElementById('btn-recalc').style.display='none';
+    setStep(1);showToast('Planilha excluida.');
+  } else if(t==='rota'){
+    APP.routes=[];
+    document.getElementById('rota-list').innerHTML='<div class="zs"><div class="zi">&#129302;</div><div class="zt">Rota excluida</div></div>';
+    document.getElementById('btn-print').style.display='none';
+    document.getElementById('btn-recalc').style.display='none';
+    showToast('Rota excluida.');
+  } else if(t==='apontamento'){
+    document.getElementById('ap-list').innerHTML='';
+    updateApSummary([]);showToast('Apontamento excluido.');
+  } else if(t==='historico'){
+    APP.history=[];renderHistorico(APP.history);showToast('Historico excluido.');
+  } else if(t==='hist-row'&&APP.delCb){
+    APP.delCb();renderHistorico(APP.history);showToast('Registro excluido.');
+  }
+}
+
+// NAV
+const TITLES={config:'Configuracoes',import:'Importar & Roteirizar',apontamento:'Apontamento',historico:'Historico',dashboard:'Dashboard'};
+function goTo(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')==="goTo('"+id+"')")n.classList.add('active')});
+  document.getElementById('ttitle').textContent=TITLES[id];
+  if(id==='apontamento')renderApontamento();
+  if(id==='dashboard')renderCharts();
+  if(id==='import')checkPending();
+}
+(function(){
+  const d=new Date();
+  document.getElementById('tdate').textContent=d.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('ap-data').valueAsDate=d;
+})();
+
+function setStep(n){
+  for(let i=1;i<=4;i++){
+    const c=document.getElementById('sc'+i),l=document.getElementById('sl'+i),ln=document.getElementById('ln'+i);
+    if(i<n){c.className='isc done';c.textContent='V';l.className='isl done';if(ln)ln.className='iline done';}
+    else if(i===n){c.className='isc active';c.textContent=i;l.className='isl active';if(ln)ln.className='iline';}
+    else{c.className='isc idle';c.textContent=i;l.className='isl';if(ln)ln.className='iline';}
+  }
+}
+
+// PENDENTES ANTERIORES
+function checkPending(){
+  const pending=APP.history.filter(r=>r.status!=='sucesso');
+  APP.pendingPrev=pending;APP.checkedPending.clear();
+  const pw=document.getElementById('pw'),pl=document.getElementById('pwlist');
+  if(!pending.length){pw.classList.remove('on');return;}
+  pw.classList.add('on');
+  let html='';
+  pending.forEach((r,i)=>{
+    html+='<div class="pwi"><div class="pwc" id="pwc-'+i+'" onclick="togglePending('+i+')"></div><div style="flex:1"><strong style="color:#fff">'+r.nf+'</strong> &nbsp;|&nbsp; '+r.addr+'</div><span class="pill '+(r.status==='pendente'?'pa':'pr')+'">'+r.status+'</span></div>';
+  });
+  pl.innerHTML=html;
+}
+function togglePending(i){
+  const el=document.getElementById('pwc-'+i);
+  if(APP.checkedPending.has(i)){APP.checkedPending.delete(i);el.classList.remove('on');el.textContent='';}
+  else{APP.checkedPending.add(i);el.classList.add('on');el.textContent='V';}
+}
+
+// UPLOAD
+function handleUpload(e){
+  const f=e.target.files[0];if(!f)return;
+  APP.fileLoaded=true;APP.routes=[...DEMO];
+  const fi=document.getElementById('finfo');
+  fi.style.display='block';
+  fi.innerHTML='<strong>'+f.name+'</strong> &mdash; '+DEMO.length+' registros (ROTA: Fiorino)';
+  document.getElementById('btn-analise').disabled=false;
+  setStep(2);showToast('Planilha importada!','ok');
+}
+
+// ANALISAR
+function analisarRegiao(){
+  if(!APP.fileLoaded){showToast('Importe uma planilha primeiro.');return;}
+  const counts={};APP.routes.forEach(r=>counts[r.regiao]=(counts[r.regiao]||0)+1);
+  const total=APP.routes.length;
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const top=sorted[0][0];
+  let bars='';
+  sorted.forEach(([reg,cnt])=>{
+    const pct=Math.round(cnt/total*100);
+    bars+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="min-width:76px;font-size:12px;color:var(--gray3)">'+reg+'</div><div style="flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden"><div style="height:6px;background:var(--b4);width:'+pct+'%;transition:width .5s;border-radius:3px"></div></div><div style="font-size:11px;color:var(--b3);min-width:80px;text-align:right">'+cnt+' parada'+(cnt>1?'s':'')+' ('+pct+'%)</div></div>';
+  });
+  document.getElementById('rbars').innerHTML=bars;
+  let grid='';
+  ALL_ZONAS.forEach(z=>{
+    const cnt=counts[z]||0,isSug=z===top;
+    grid+='<div class="zcard'+(isSug?' sug':'')+'" id="zc-'+z.replace(/\s/g,'_')+'" onclick="toggleZona(\''+z+'\','+cnt+')">';
+    grid+='<div class="zname">'+z+'</div><div class="zcount">'+cnt+' parada'+(cnt!==1?'s':'')+'</div>';
+    grid+='<div class="zbadge '+(isSug?'zs':'zsel')+'" id="zb-'+z.replace(/\s/g,'_')+'" style="'+(isSug?'':'visibility:hidden')+'">'+(isSug?'IA sugeriu':'OK')+'</div></div>';
+  });
+  document.getElementById('zona-grid').innerHTML=grid;
+  APP.selectedZonas.clear();
+  document.getElementById('card-zona').style.display='block';
+  document.getElementById('zcbar').classList.remove('on');
+  document.getElementById('sel-info').style.display='none';
+  setStep(3);document.getElementById('card-zona').scrollIntoView({behavior:'smooth',block:'nearest'});
+  showToast('Regioes analisadas! Selecione zona(s).','ok');
+}
+
+function toggleZona(name,cnt){
+  const card=document.getElementById('zc-'+name.replace(/\s/g,'_'));
+  const badge=document.getElementById('zb-'+name.replace(/\s/g,'_'));
+  if(APP.selectedZonas.has(name)){
+    APP.selectedZonas.delete(name);card.classList.remove('sel');
+    const c={};APP.routes.forEach(r=>c[r.regiao]=(c[r.regiao]||0)+1);
+    const top=Object.entries(c).sort((a,b)=>b[1]-a[1])[0][0];
+    if(name===top){badge.className='zbadge zs';badge.textContent='IA sugeriu';badge.style.visibility='visible';}
+    else badge.style.visibility='hidden';
+  } else {
+    APP.selectedZonas.add(name);card.classList.add('sel');
+    badge.className='zbadge zsel';badge.textContent='Selecionada';badge.style.visibility='visible';
+  }
+  const tot=APP.routes.filter(r=>APP.selectedZonas.has(r.regiao)).length;
+  const info=document.getElementById('sel-info'),bar=document.getElementById('zcbar');
+  if(APP.selectedZonas.size===0){info.style.display='none';bar.classList.remove('on');}
+  else{
+    info.style.display='block';
+    info.textContent=[...APP.selectedZonas].join(', ')+' — '+tot+' parada'+(tot!==1?'s':'');
+    bar.classList.add('on');
+    document.getElementById('zcname').textContent=[...APP.selectedZonas].join(', ');
+    document.getElementById('zcinfo').textContent=tot+' parada'+(tot!==1?'s':'');
+  }
+}
+
+// GERAR ROTA
+function gerarRota(){
+  if(APP.selectedZonas.size===0){showToast('Selecione ao menos uma zona.');return;}
+  let extras=[];
+  APP.checkedPending.forEach(i=>extras.push({...APP.pendingPrev[i]}));
+  // Filtra APENAS as paradas das zonas selecionadas
+  let base=[...DEMO,...extras].filter(r=>APP.selectedZonas.has(r.regiao));
+  if(!base.length){showToast('Nenhuma parada nas zonas selecionadas.');return;}
+  document.getElementById('rota-list').innerHTML='<div style="text-align:center;padding:26px;color:var(--gray4)"><div class="loader"></div>Calculando do mais longe para o mais proximo...</div>';
+  setTimeout(()=>{
+    const opt=optimizeRoute(base);
+    APP.routes=opt;
+    APP.checkedRoutes=new Set(opt.map(r=>r.nf));
+    renderRouteList();
+    setStep(4);
+    document.getElementById('btn-print').style.display='inline-flex';
+    document.getElementById('btn-recalc').style.display='inline-flex';
+    showToast('Rota gerada! Do mais longe para o mais proximo.','ok');
+  },1000);
+}
+
+function renderRouteList(){
+  const sL={red:'Urgente',amber:'Atrasado',green:'Pendente'};
+  const sC={red:'pr',amber:'pa',green:'pg'};
+  const tkm=totalKm(APP.routes);
+  const mins=APP.routes.length*15;
+  const h=Math.floor(mins/60),m=mins%60;
+  let html='';
+  html+='<div class="ritem dep"><div class="rnum dp">&#127968;</div><div style="flex:1"><div style="font-size:13px;color:#93c5fd;font-weight:600">SAIDA &mdash; Rua Marina, 1338 &mdash; CEP 09560-560</div><div style="font-size:11px;color:var(--b3);margin-top:2px">09:00 &nbsp;|&nbsp; Ordem: mais longe primeiro</div></div></div>';
+  APP.routes.forEach((r,i)=>{
+    const chk=APP.checkedRoutes.has(r.nf);
+    html+='<div class="ritem" id="ri-'+i+'">';
+    html+='<div class="rchk'+(chk?' on':'')+'" id="rchk-'+i+'" onclick="toggleRChk('+i+',\''+r.nf+'\')">'+(chk?'&#10003;':'')+'</div>';
+    html+='<div class="rnum">'+r.num+'</div>';
+    html+='<div style="flex:1">';
+    html+='<div class="raddr">'+r.addr+'</div>';
+    html+='<div class="rmeta">'+r.tipo+' &nbsp;&middot;&nbsp; <span style="color:var(--b3)">'+r.nf+'</span> &nbsp;&middot;&nbsp; '+r.regiao+' &nbsp;&middot;&nbsp; <strong>'+r.cliente+'</strong></div>';
+    html+='<div class="rdist">&#128205; '+r.dprev+' km do anterior &nbsp;|&nbsp; ~'+eHora(i)+'</div>';
+    html+='</div><span class="pill '+sC[r.status]+'">'+sL[r.status]+'</span></div>';
+  });
+  const ld=APP.routes.length>0?APP.routes[APP.routes.length-1].ddepot:'?';
+  html+='<div class="ritem dep"><div class="rnum dp">&#127968;</div><div style="flex:1"><div style="font-size:13px;color:#93c5fd;font-weight:600">RETORNO &mdash; Rua Marina, 1338</div><div style="font-size:11px;color:var(--b3);margin-top:2px">~'+ld+' km &nbsp;|&nbsp; Limite 17:00</div></div></div>';
+  const rod=checkRodizio();
+  const rodHtml=rod?'<div style="margin-top:8px;padding:8px 12px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);border-radius:8px;font-size:12px;color:#fca5a5;font-weight:600">&#128683; '+rod+'</div>':'';
+  html+='<div class="aibox"><span class="aitag">IA</span><strong style="color:#fff">Trajeto otimizado geograficamente (sem ziguezague)</strong> &nbsp;&middot;&nbsp; '+APP.routes.length+' paradas &nbsp;&middot;&nbsp; ~'+tkm+' km &nbsp;&middot;&nbsp; Paradas: <strong style="color:#fff">'+h+'h'+(m?m+'min':'')+'</strong> &nbsp;&middot;&nbsp; <strong style="color:'+(mins<=420?'#86efac':'#fca5a5')+'">'+(mins<=420?'Dentro da jornada':'Atencao: excede 7h')+'</strong> &nbsp;&middot;&nbsp; Placa: <strong style="color:#e2e8f0">QQK-5Z83</strong></div>'+rodHtml;
+  html+='<div style="margin-top:10px;padding:9px 13px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:8px;font-size:12px;color:var(--gray3)">&#9745; Desmarque clientes que nao serao atendidos e clique em <strong style="color:#fff">Recalcular</strong>.</div>';
+  document.getElementById('rota-list').innerHTML=html;
+}
+
+function toggleRChk(idx,nf){
+  const el=document.getElementById('rchk-'+idx);
+  if(APP.checkedRoutes.has(nf)){APP.checkedRoutes.delete(nf);el.classList.remove('on');el.innerHTML='';}
+  else{APP.checkedRoutes.add(nf);el.classList.add('on');el.innerHTML='&#10003;';}
+}
+
+function recalcularRota(){
+  const filtered=APP.routes.filter(r=>APP.checkedRoutes.has(r.nf));
+  if(!filtered.length){showToast('Marque ao menos 1 cliente.');return;}
+  document.getElementById('rota-list').innerHTML='<div style="text-align:center;padding:24px;color:var(--gray4)"><div class="loader"></div>Recalculando...</div>';
+  setTimeout(()=>{
+    const opt=optimizeRoute(filtered);
+    APP.routes=opt;APP.checkedRoutes=new Set(opt.map(r=>r.nf));
+    renderRouteList();showToast('Rota recalculada!','ok');
+  },700);
+}
+
+// IMPRIMIR
+function imprimirRota(){
+  const hoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const hojeS=new Date().toLocaleDateString('pt-BR');
+  const zonas=[...APP.selectedZonas].join(', ')||'-';
+  const total=APP.routes.length;
+  const tkm=totalKm(APP.routes);
+  const urg=APP.routes.filter(r=>r.status==='red').length;
+  const atr=APP.routes.filter(r=>r.status==='amber').length;
+  const pen=APP.routes.filter(r=>r.status==='green').length;
+  const vol=APP.routes.reduce((a,b)=>a+(parseInt(b.volume)||0),0);
+  const csm={red:'psr',amber:'psa',green:'psg'};
+  const slb={red:'URGENTE',amber:'ATRASADO',green:'PENDENTE'};
+  let rows='';
+  APP.routes.forEach((r,i)=>{
+    rows+='<tr><td style="text-align:center;font-weight:700;color:#1d4ed8">'+(i+1)+'</td>';
+    rows+='<td><strong>'+(r.cliente||'-')+'</strong></td>';
+    rows+='<td>'+r.addr+(r.cep?' | '+r.cep:'')+'</td>';
+    rows+='<td style="text-align:center">'+r.tipo+'</td>';
+    rows+='<td style="text-align:center">'+(r.volume||'-')+'</td>';
+    rows+='<td>'+(r.modelo||'-')+'</td>';
+    rows+='<td style="font-weight:600">'+r.nf+'</td>';
+    rows+='<td>'+(r.responsavel||'-')+'</td>';
+    rows+='<td>'+(r.contato||'-')+'</td>';
+    rows+='<td style="text-align:center"><span class="'+csm[r.status]+'">'+slb[r.status]+'</span></td>';
+    rows+='<td style="color:#94a3b8">____________</td></tr>';
+  });
+  document.getElementById('print-content').innerHTML=
+    '<div class="pp"><div class="ph"><div><div class="plogo">ROTEIRIZACAO &mdash; Folha de Rota</div><div style="font-size:8px;color:#64748b;margin-top:1px">Sistema de Logistica &mdash; '+hoje+'</div></div><div style="text-align:right;font-size:9px"><strong>'+hojeS+'</strong><br>'+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</div></div>'+
+    '<div class="pdep">SAIDA E RETORNO: Rua Marina, 1338 &mdash; CEP 09560-560 &mdash; SP &nbsp;|&nbsp; Saida: 09:00 &nbsp;|&nbsp; Retorno ate: 17:00 &nbsp;|&nbsp; Zona(s): '+zonas+' &nbsp;|&nbsp; KM estimado: ~'+tkm+' km</div>'+
+    '<div class="psum"><div class="psb"><div class="psv">'+total+'</div><div class="psl">Paradas</div></div><div class="psb" style="border-top-color:#ef4444"><div class="psv" style="color:#ef4444">'+urg+'</div><div class="psl">Urgentes</div></div><div class="psb" style="border-top-color:#f59e0b"><div class="psv" style="color:#f59e0b">'+atr+'</div><div class="psl">Atrasados</div></div><div class="psb" style="border-top-color:#16a34a"><div class="psv" style="color:#16a34a">'+pen+'</div><div class="psl">Pendentes</div></div><div class="psb" style="border-top-color:#7c3aed"><div class="psv" style="color:#7c3aed">'+vol+'</div><div class="psl">Volumes</div></div></div>'+
+    '<table class="ptbl"><thead><tr><th>#</th><th>Cliente / Loja</th><th>Endereco + CEP</th><th>Tipo</th><th>Vol.</th><th>Modelo Equip.</th><th>Nota Fiscal</th><th>Responsavel</th><th>Contato</th><th>Prioridade</th><th>Assinatura</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div class="pinst"><strong>Instrucoes:</strong> Saida: Rua Marina 1338 as 09h. Siga ordem numerada (mais longe para mais proximo). Prioridade: URGENTE > ATRASADO > PENDENTE. Max 15min/parada. Almoco: 1h. Retorno ate 17h. &nbsp; <strong>KM inicial:___________ KM final:___________</strong></div>'+
+    '<div class="psign"><div class="pss">Assinatura do Motorista</div><div class="pss">Assinatura do Conferente</div></div>'+
+    '<div class="pfoot"><span>Roteirizacao &mdash; Sistema de Logistica</span><span>'+hoje+'</span></div></div>';
+  window.print();
+}
+
+// APONTAMENTO
+function renderApontamento(){
+  const routes=APP.routes.length?APP.routes:DEMO;
+  let html='';
+  routes.forEach((r,i)=>{
+    html+='<div class="apitem">';
+    html+='<div class="aph"><span class="apnf">'+r.nf+'</span><span class="pill '+(r.tipo==='Coleta'?'pb':'pg')+'">'+r.tipo+'</span></div>';
+    html+='<div class="apaddr"><strong style="color:var(--gray3)">'+r.cliente+'</strong> &mdash; '+r.addr+'</div>';
+    html+='<div class="apctrl">';
+    html+='<select class="sels" id="ap-sel-'+i+'" onchange="handleApSt('+i+')">';
+    html+='<option value="">-- Selecionar --</option>';
+    html+='<option value="sucesso">'+(r.tipo==='Coleta'?'Coletado':'Entregue')+'</option>';
+    html+='<option value="insucesso">'+(r.tipo==='Coleta'?'Nao Coletado':'Nao Entregue')+'</option>';
+    html+='</select></div>';
+    html+='<div class="motrow" id="mot-'+i+'">';
+    html+='<select class="sels" id="ap-cat-'+i+'">';
+    html+='<option value="">Tipo de insucesso</option>';
+    html+='<option value="improdutiva">Improdutiva (cliente presente mas nao quis/nao tinha condicoes)</option>';
+    html+='<option value="frustrada">Frustrada (cliente ausente / endereco nao encontrado)</option>';
+    html+='</select>';
+    html+='<input type="text" id="ap-det-'+i+'" placeholder="Descreva o motivo em detalhes (ex: destinatario ausente, portao fechado, nao atende telefone...)" style="font-size:12px">';
+    html+='</div></div>';
+  });
+  document.getElementById('ap-list').innerHTML=html;
+  updateApSummary(routes);
+}
+function handleApSt(i){
+  const v=document.getElementById('ap-sel-'+i).value;
+  const m=document.getElementById('mot-'+i);
+  v==='insucesso'?m.classList.add('on'):m.classList.remove('on');
+  updateApSummary(APP.routes.length?APP.routes:DEMO);
+}
+function updateApSummary(routes){
+  if(!routes||!routes.length){['ap-total','ap-ok','ap-fail','ap-pend'].forEach(id=>document.getElementById(id).textContent='0');return;}
+  let ok=0,fail=0,pend=0;
+  routes.forEach((_,i)=>{
+    const v=(document.getElementById('ap-sel-'+i)||{}).value||'';
+    if(v==='sucesso')ok++;else if(v==='insucesso')fail++;else pend++;
+  });
+  document.getElementById('ap-total').textContent=routes.length;
+  document.getElementById('ap-ok').textContent=ok;
+  document.getElementById('ap-fail').textContent=fail;
+  document.getElementById('ap-pend').textContent=pend;
+}
+function salvarApontamento(){
+  const routes=APP.routes.length?APP.routes:DEMO;
+  const data=document.getElementById('ap-data').value;
+  routes.forEach((r,i)=>{
+    const status=(document.getElementById('ap-sel-'+i)||{}).value||'pendente';
+    const motcat=(document.getElementById('ap-cat-'+i)||{}).value||'';
+    const motdet=(document.getElementById('ap-det-'+i)||{}).value||'';
+    APP.history.push({data,nf:r.nf,addr:r.addr,tipo:r.tipo,regiao:r.regiao,status,motcat,motdet,cliente:r.cliente||'-',volume:r.volume||0});
+  });
+  renderHistorico(APP.history);
+  showToast(routes.length+' registros salvos!','ok');
+}
+
+// HISTORICO
+function renderHistorico(data){
+  const sMap={sucesso:'<span class="pill pg">Sucesso</span>',insucesso:'<span class="pill pr">Insucesso</span>',pendente:'<span class="pill pa">Pendente</span>'};
+  let html='';
+  if(!data.length){html='<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--gray5)">Nenhum registro.</td></tr>';}
+  else data.forEach((r,i)=>{
+    html+='<tr><td>'+(r.data||'-')+'</td><td style="color:var(--b3)">'+r.nf+'</td><td>'+r.cliente+'</td>';
+    html+='<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.addr+'</td>';
+    html+='<td>'+r.tipo+'</td><td>'+r.regiao+'</td><td>'+(sMap[r.status]||'-')+'</td>';
+    html+='<td>'+(r.motcat?'<span class="pill '+(r.motcat==='improdutiva'?'pa':'pr')+'">'+r.motcat+'</span>':'-')+'</td>';
+    html+='<td style="max-width:160px;font-size:11px;color:var(--gray4);word-break:break-word">'+((r.motdet&&r.motdet.trim())?r.motdet:'-')+'</td>';
+    html+='<td><button class="del-btn" onclick="openDel(\'hist-row\',\'Excluir '+r.nf+'?\',function(){APP.history.splice('+i+',1)})">&#128465;&#65039;</button></td></tr>';
+  });
+  document.getElementById('hist-body').innerHTML=html;
+}
+function filtrar(){
+  const ini=document.getElementById('f-ini').value,fim=document.getElementById('f-fim').value;
+  const nf=document.getElementById('f-nf').value.toLowerCase(),reg=document.getElementById('f-reg').value,tipo=document.getElementById('f-tipo').value;
+  const f=APP.history.filter(r=>{
+    if(ini&&r.data<ini)return false;if(fim&&r.data>fim)return false;
+    if(nf&&!r.nf.toLowerCase().includes(nf))return false;
+    if(reg&&r.regiao!==reg)return false;if(tipo&&r.tipo!==tipo)return false;return true;
+  });
+  renderHistorico(f);showToast(f.length+' registro(s)');
+}
+function limparFiltros(){
+  ['f-ini','f-fim','f-nf','f-reg','f-tipo'].forEach(id=>document.getElementById(id).value='');
+  renderHistorico(APP.history);
+}
+
+// CHARTS
+function dch(id){if(APP.charts[id]){APP.charts[id].destroy();delete APP.charts[id];}}
+function renderCharts(){
+  const h=APP.history,total=h.length;
+  const suc=h.filter(r=>r.status==='sucesso').length;
+  const ins=h.filter(r=>r.status==='insucesso').length;
+  const pend=h.filter(r=>r.status==='pendente').length;
+  const col=h.filter(r=>r.tipo==='Coleta'),ent=h.filter(r=>r.tipo==='Entrega');
+  const colS=col.filter(r=>r.status==='sucesso').length;
+  const entS=ent.filter(r=>r.status==='sucesso').length;
+  const vol=h.reduce((a,b)=>a+(parseInt(b.volume)||0),0);
+  const improd=h.filter(r=>r.motcat==='improdutiva').length;
+  const frustr=h.filter(r=>r.motcat==='frustrada').length;
+  const cliSet=new Set(h.filter(r=>r.status==='sucesso').map(r=>r.cliente));
+
+  document.getElementById('d-prog').textContent=total;
+  document.getElementById('d-real').textContent=suc;
+  document.getElementById('d-taxa').textContent=total?Math.round(suc/total*100)+'%':'-';
+  document.getElementById('d-cli').textContent=cliSet.size;
+  document.getElementById('d-tempo').textContent=ins?(ins*15)+' min':'0 min';
+  document.getElementById('d-efic').textContent=total?Math.round(suc/total*100)+'%':'-';
+  document.getElementById('d-vol').textContent=vol;
+
+  const tickY={color:'rgba(255,255,255,.35)',font:{size:10},stepSize:1,callback:v=>Number.isInteger(v)?v:''};
+  const bO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.35)',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:tickY,grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}}};
+  const dO={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(255,255,255,.5)',font:{size:10},boxWidth:10}}}};
+
+  dch('geral');
+  APP.charts.geral=new Chart(document.getElementById('c-geral'),{type:'bar',
+    data:{labels:['Programado','Realizado'],
+    datasets:[{data:[total,suc],backgroundColor:['rgba(37,99,235,.6)','rgba(34,197,94,.6)'],borderColor:['#3b82f6','#22c55e'],borderWidth:1,borderRadius:6}]},
+    options:bO});
+
+  dch('volume');
+  APP.charts.volume=new Chart(document.getElementById('c-volume'),{type:'bar',
+    data:{labels:['Entregas Realizadas','Coletas Realizadas'],
+    datasets:[{data:[entS,colS],backgroundColor:['rgba(34,197,94,.7)','rgba(59,130,246,.7)'],borderColor:['#22c55e','#3b82f6'],borderWidth:1,borderRadius:5}]},
+    options:bO});
+
+  const lc={};h.filter(r=>r.status==='sucesso').forEach(r=>{lc[r.cliente]=(lc[r.cliente]||0)+1;});
+  const le=Object.entries(lc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  dch('lojas');
+  APP.charts.lojas=new Chart(document.getElementById('c-lojas'),{type:'bar',
+    data:{labels:le.map(e=>e[0])||['Sem dados'],datasets:[{data:le.map(e=>e[1])||[0],backgroundColor:'rgba(59,130,246,.65)',borderColor:'#3b82f6',borderWidth:1,borderRadius:5}]},
+    options:{...bO,indexAxis:'y'}});
+
+  dch('insuc');
+  APP.charts.insuc=new Chart(document.getElementById('c-insuc'),{type:'doughnut',
+    data:{labels:['Improdutiva','Frustrada','Sucesso'],datasets:[{data:[improd||0,frustr||0,suc||0],backgroundColor:['rgba(245,158,11,.7)','rgba(239,68,68,.7)','rgba(34,197,94,.7)'],borderColor:['#f59e0b','#ef4444','#22c55e'],borderWidth:2}]},
+    options:{...dO,cutout:'60%'}});
+
+  const mc={};
+  h.filter(r=>r.motdet&&r.motdet.trim()).forEach(r=>{const k=r.motdet.trim().substring(0,40);mc[k]=(mc[k]||0)+1;});
+  const me=Object.entries(mc).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  let mh='';
+  if(!me.length){mh='<div class="zs" style="padding:18px"><div class="zt" style="font-size:12px">Sem motivos registrados</div></div>';}
+  else{
+    const mv=me[0][1];
+    me.forEach(([mot,cnt])=>{
+      const pct=Math.round(cnt/mv*100);
+      mh+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+      mh+='<div style="flex:1;font-size:12px;color:var(--gray3);text-transform:capitalize">'+mot+'</div>';
+      mh+='<div style="width:150px;height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:7px;background:var(--r5);width:'+pct+'%;border-radius:4px"></div></div>';
+      mh+='<div style="min-width:28px;text-align:right;font-size:12px;color:#fca5a5;font-weight:600">'+cnt+'x</div></div>';
+    });
+  }
+  document.getElementById('motivos-list').innerHTML=mh;
+
+  // Popula tabela detalhada
+  renderExpTable(APP.history);
+}
+
+// ═══════════════════════════════════════════
+// TABELA DETALHADA NO DASHBOARD
+// ═══════════════════════════════════════════
+let expFiltered = [];
+function renderExpTable(data){
+  expFiltered = data;
+  const sMap={sucesso:'<span style="background:#dcfce7;color:#15803d;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">Realizado</span>',insucesso:'<span style="background:#fee2e2;color:#b91c1c;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">Insucesso</span>',pendente:'<span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">Pendente</span>'};
+  let html='';
+  if(!data.length){html='<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--gray5)">Nenhum registro no periodo.</td></tr>';}
+  else data.forEach(r=>{
+    html+='<tr>';
+    html+='<td>'+((r.data||'-').split('-').reverse().join('/'))+'</td>';
+    html+='<td style="color:var(--b3);font-weight:600">'+r.nf+'</td>';
+    html+='<td><strong>'+r.cliente+'</strong></td>';
+    html+='<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.addr+'</td>';
+    html+='<td>'+r.regiao+'</td>';
+    html+='<td>'+r.tipo+'</td>';
+    html+='<td style="text-align:center">'+(r.volume||'-')+'</td>';
+    html+='<td style="font-size:11px">'+(r.modelo||'-')+'</td>';
+    html+='<td>'+(r.responsavel||'-')+'</td>';
+    html+='<td>'+(r.contato||'-')+'</td>';
+    html+='<td>'+(sMap[r.status]||'-')+'</td>';
+    html+='<td>'+(r.motcat?'<span style="background:rgba(245,158,11,.15);color:#fcd34d;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600">'+r.motcat+'</span>':'-')+'</td>';
+    html+='<td style="font-size:11px;color:var(--gray4);max-width:160px">'+((r.motdet&&r.motdet.trim())?r.motdet:'-')+'</td>';
+    html+='</tr>';
+  });
+  document.getElementById('exp-body').innerHTML=html;
+}
+function filtrarExp(){
+  const ini=document.getElementById('exp-ini').value;
+  const fim=document.getElementById('exp-fim').value;
+  let d=[...APP.history];
+  if(ini) d=d.filter(r=>r.data>=ini);
+  if(fim) d=d.filter(r=>r.data<=fim);
+  renderExpTable(d);
+  showToast(d.length+' registro(s) no periodo');
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR CSV
+// ═══════════════════════════════════════════
+function exportCSV(){
+  const data = expFiltered.length ? expFiltered : APP.history;
+  if(!data.length){showToast('Nenhum dado para exportar.');return;}
+  const cols=['Data','NF','Cliente','Endereco','Regiao','Tipo','Volume','Modelo','Responsavel','Contato','Status','Cat.Insucesso','Motivo Detalhado'];
+  const rows=data.map(r=>[
+    (r.data||'').split('-').reverse().join('/'),
+    r.nf,r.cliente,r.addr,r.regiao,r.tipo,
+    r.volume||'',r.modelo||'',r.responsavel||'',r.contato||'',
+    r.status,r.motcat||'',r.motdet||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';'));
+  const csv='\uFEFF'+cols.join(';')+'\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='relatorio_logistica_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  showToast('CSV exportado!','ok');
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR JSON
+// ═══════════════════════════════════════════
+function exportJSON(){
+  const data = expFiltered.length ? expFiltered : APP.history;
+  if(!data.length){showToast('Nenhum dado para exportar.');return;}
+  const payload={geradoEm:new Date().toLocaleString('pt-BR'),empresa:'Roteirizacao Logistica',veiculo:'Fiat Fiorino',placa:'QQK-5Z83',totalRegistros:data.length,registros:data};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='dados_logistica_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);
+  showToast('JSON exportado!','ok');
+}
+
+// ═══════════════════════════════════════════
+// RELATORIO PDF (impressão)
+// ═══════════════════════════════════════════
+function exportRelPrint(){
+  const data = expFiltered.length ? expFiltered : APP.history;
+  const hoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const total=data.length;
+  const suc=data.filter(r=>r.status==='sucesso').length;
+  const ins=data.filter(r=>r.status==='insucesso').length;
+  const pend=data.filter(r=>r.status==='pendente').length;
+  const taxa=total?Math.round(suc/total*100):0;
+  const vol=data.reduce((a,b)=>a+(parseInt(b.volume)||0),0);
+  const improd=data.filter(r=>r.motcat==='improdutiva').length;
+  const frustr=data.filter(r=>r.motcat==='frustrada').length;
+  const cliSet=new Set(data.filter(r=>r.status==='sucesso').map(r=>r.cliente));
+
+  // Motivos top
+  const mc={};
+  data.filter(r=>r.motdet&&r.motdet.trim()).forEach(r=>{const k=r.motdet.trim().substring(0,50);mc[k]=(mc[k]||0)+1;});
+  const me=Object.entries(mc).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  // Tabela linhas
+  let rows='';
+  data.forEach((r,i)=>{
+    const ds={sucesso:'rp-pill-s',insucesso:'rp-pill-i',pendente:'rp-pill-p'};
+    const sl={sucesso:'Realizado',insucesso:'Insucesso',pendente:'Pendente'};
+    rows+='<tr>';
+    rows+='<td style="text-align:center;color:#1d4ed8;font-weight:700">'+(i+1)+'</td>';
+    rows+='<td>'+((r.data||'').split('-').reverse().join('/'))+'</td>';
+    rows+='<td style="color:#1d4ed8;font-weight:600">'+r.nf+'</td>';
+    rows+='<td><strong>'+r.cliente+'</strong></td>';
+    rows+='<td>'+r.addr+'</td>';
+    rows+='<td>'+r.regiao+'</td>';
+    rows+='<td style="text-align:center">'+r.tipo+'</td>';
+    rows+='<td style="text-align:center">'+(r.volume||'-')+'</td>';
+    rows+='<td><span class="'+(ds[r.status]||'rp-pill-p')+'">'+sl[r.status]+'</span></td>';
+    rows+='<td>'+(r.motcat||'-')+'</td>';
+    rows+='<td style="font-size:7px;color:#64748b;max-width:120px">'+((r.motdet&&r.motdet.trim())?r.motdet:'-')+'</td>';
+    rows+='</tr>';
+  });
+
+  // Motivos HTML
+  let motHtml='';
+  if(!me.length) motHtml='<div style="font-size:10px;color:#64748b;padding:8px">Nenhum motivo registrado.</div>';
+  else me.forEach(([m,c])=>{
+    motHtml+='<div class="rp-motcard"><div class="rp-motlabel">'+m+'</div><div class="rp-motval">'+c+'x</div></div>';
+  });
+
+  const iniVal=document.getElementById('exp-ini').value;
+  const fimVal=document.getElementById('exp-fim').value;
+  const periodo=(iniVal||fimVal)?((iniVal?iniVal.split('-').reverse().join('/'):'inicio')+' a '+(fimVal?fimVal.split('-').reverse().join('/'):'hoje')):'Todos os registros';
+
+  document.getElementById('rel-content').innerHTML=
+  '<div class="rp">'+
+  '<div class="rp-header">'+
+    '<div><div class="rp-logo">&#9650; Roteirizacao &mdash; Relatorio Executivo de Logistica</div>'+
+    '<div class="rp-sub">Veiculo: Fiat Fiorino &nbsp;|&nbsp; Placa: QQK-5Z83 &nbsp;|&nbsp; Periodo: '+periodo+'</div></div>'+
+    '<div class="rp-meta">Gerado em<br><strong>'+hoje+'</strong><br>'+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</div>'+
+  '</div>'+
+
+  '<div class="rp-section">&#128202; Indicadores de Desempenho</div>'+
+  '<div class="rp-kpis">'+
+    '<div class="rp-kcard"><div class="rp-kval">'+total+'</div><div class="rp-klabel">Total Programado</div></div>'+
+    '<div class="rp-kcard" style="border-top-color:#16a34a"><div class="rp-kval" style="color:#15803d">'+suc+'</div><div class="rp-klabel">Realizados</div></div>'+
+    '<div class="rp-kcard" style="border-top-color:#ef4444"><div class="rp-kval" style="color:#dc2626">'+ins+'</div><div class="rp-klabel">Insucessos</div></div>'+
+    '<div class="rp-kcard" style="border-top-color:#f59e0b"><div class="rp-kval" style="color:#d97706">'+pend+'</div><div class="rp-klabel">Pendentes</div></div>'+
+    '<div class="rp-kcard" style="border-top-color:#7c3aed"><div class="rp-kval" style="color:#7c3aed">'+taxa+'%</div><div class="rp-klabel">Taxa de Sucesso</div></div>'+
+  '</div>'+
+  '<div class="rp-kpis" style="grid-template-columns:repeat(4,1fr)">'+
+    '<div class="rp-kcard"><div class="rp-kval">'+vol+'</div><div class="rp-klabel">Volumes Movimentados</div></div>'+
+    '<div class="rp-kcard"><div class="rp-kval">'+cliSet.size+'</div><div class="rp-klabel">Clientes Atingidos</div></div>'+
+    '<div class="rp-kcard" style="border-top-color:#f59e0b"><div class="rp-kval" style="color:#d97706">'+improd+'</div><div class="rp-klabel">Improdutivas</div></div>'+
+    '<div class="rp-kcard" style="border-top-color:#ef4444"><div class="rp-kval" style="color:#dc2626">'+frustr+'</div><div class="rp-klabel">Frustradas</div></div>'+
+  '</div>'+
+
+  '<div class="rp-section">&#128683; Principais Motivos de Insucesso</div>'+
+  '<div class="rp-motivos">'+motHtml+'</div>'+
+
+  '<div class="rp-section">&#128203; Relacao Completa de Operacoes</div>'+
+  '<table class="rp-tbl">'+
+  '<thead><tr><th>#</th><th>Data</th><th>NF</th><th>Cliente</th><th>Endereco</th><th>Regiao</th><th>Tipo</th><th>Vol.</th><th>Status</th><th>Cat.</th><th>Motivo</th></tr></thead>'+
+  '<tbody>'+rows+'</tbody></table>'+
+
+  '<div class="rp-nota"><strong>Observacoes:</strong> Veiculo Fiat Fiorino &mdash; Placa QQK-5Z83 (rodizio: tercas 07h-10h e 17h-20h) &nbsp;|&nbsp; Base: Rua Marina, 1338 &mdash; CEP 09560-560 &mdash; SP &nbsp;|&nbsp; Jornada: 09h as 17h</div>'+
+
+  '<div class="rp-sign">'+
+    '<div class="rp-signbox">Responsavel pela Logistica</div>'+
+    '<div class="rp-signbox">Gerente / Coordenador</div>'+
+    '<div class="rp-signbox">Diretoria</div>'+
+  '</div>'+
+  '<div class="rp-footer"><span>Roteirizacao &mdash; Sistema de Logistica Inteligente</span><span>'+hoje+'</span></div>'+
+  '</div>';
+
+  window.print();
+}
+
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='on'+(type?' '+type:'');
+  setTimeout(()=>t.className='',3200);
+}
+
+renderHistorico(APP.history);
+</script>
+</body>
+</html>
